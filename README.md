@@ -26,6 +26,9 @@ stored.
 The region field is Azure's standard deployment setting and does not affect the connector. Your
 Data Collection Rule keeps the region it was created in.
 
+**One workspace at a time.** A Log Analytics workspace holds one Cato connector, so if you run the
+connector in more than one workspace, apply the update once per workspace.
+
 ## What changes, and what does not
 
 | | |
@@ -67,7 +70,8 @@ Log Analytics reserves them:
 | `time` | `TimeGenerated` |
 | `title` | `activity_title` |
 
-- **Field reference** — [Cato event field definitions](https://api.catonetworks.com/documentation/#definition-EventFieldName)
+- **Event schema** — [Cato Event Schema](https://knowledge.catonetworks.com/docs/cato-event-schema)
+- **Field definitions** — [EventFieldName in the Cato API documentation](https://api.catonetworks.com/documentation/#definition-EventFieldName)
 - **Connector setup and troubleshooting** — [Integrating Cato Events with Microsoft Sentinel](https://knowledge.catonetworks.com/docs/integrating-cato-events-with-microsoft-sentinel)
 - **Knowledge Base** — [knowledge.catonetworks.com](https://knowledge.catonetworks.com/)
 
