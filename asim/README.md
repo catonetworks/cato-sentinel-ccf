@@ -1,11 +1,11 @@
 # Cato ASIM parsers for Microsoft Sentinel — preview
 
-Deploy the preview parsers as workspace saved searches to normalize Cato events to Microsoft's Advanced Security Information Model (ASIM). The preview includes **8 schemas and 16 functions** (Catalog version 1.1.1; Microsoft schema version 1.0.0). Mapping review is ongoing; this is not a certification or a Content Hub release.
+Deploy the preview parsers as workspace saved searches to normalize Cato events to Microsoft's Advanced Security Information Model (ASIM). The preview includes **6 schemas and 12 functions** (Catalog version 2.0.0; Microsoft schema version 1.0.0). Mapping review is ongoing; this is not a certification or a Content Hub release.
 
 Choose the template for your table:
 
-- **Existing custom table with a supported name:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2Fa001525356259e182f1dbb9ee495175f7799b706%2Fasim%2FarmTemplate.json)
-- **Standard `CatoNetworksEvents_CL` table:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2Fa001525356259e182f1dbb9ee495175f7799b706%2Fasim%2FccfTemplate.json)
+- **Existing custom table with a supported name:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2F80ec57369bdf34ca63cea116a3960a28ec3ee038%2Fasim%2FarmTemplate.json)
+- **Standard `CatoNetworksEvents_CL` table:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2F80ec57369bdf34ca63cea116a3960a28ec3ee038%2Fasim%2FccfTemplate.json)
 
 ## Deploy in Azure portal
 
@@ -24,7 +24,7 @@ SUBSCRIPTION_ID='<subscription-id>'
 RESOURCE_GROUP='<resource-group>'
 WORKSPACE_NAME='<workspace-name>'
 TABLE_NAME='<existing-table-name>'
-TEMPLATE_URI='https://raw.githubusercontent.com/catonetworks/cato-sentinel-ccf/a001525356259e182f1dbb9ee495175f7799b706/asim/armTemplate.json'
+TEMPLATE_URI='https://raw.githubusercontent.com/catonetworks/cato-sentinel-ccf/80ec57369bdf34ca63cea116a3960a28ec3ee038/asim/armTemplate.json'
 ```
 
 Preview with what-if, then deploy incrementally:
@@ -53,6 +53,32 @@ vimNetworkSessionCato_CatoNetworksEvents_CL(starttime=ago(1d))
 To include Cato in a shared ASIM unifier, add its source-function invocation to the applicable unifier using the documented extension pattern. Merge without replacing existing sources; do not overwrite a built-in or other source's definition. A query can return zero rows when there are no matching events, the selected time range is empty, or fields/values do not match the parser. Zero rows alone do not indicate an installation failure.
 
 Dashboards need events in the chosen table, required fields populated by those events, and a time range containing matching data. Empty results or panels can be valid when those conditions are not met.
+
+## Catalog 2.0.0 mapping scope
+
+| Schema | Cato EVENTS selected |
+| --- | --- |
+| NetworkSession | Security / Internet Firewall, WAN Firewall, LAN Firewall; IDS projection for IPS, Suspicious Activity, Dynamic Prevention, DNS Protection |
+| Dns | Security with exact `DNS` array membership in `app_stack`; a nonempty DNS query is required |
+| WebSession | Security / Apps Security, or Security with exact `HTTP(S)` array membership in `app_stack`; a usable URL is required |
+| Authentication | Connectivity / Authenticated |
+| AlertEvent | Security / Anti Malware, SaaS Security API Anti Malware, SaaS Security API Data Protection, EPP Malware, Endpoint Protection, Data Security Alert, Data Discovery, Email Security Alert; an alert/event ID is required |
+| AuditEvent | System / Audit with an operation and object |
+
+Optional evidence does not further restrict these classifiers. Missing HTTP status is not Success; absent DNS replies do not invent requests. Generic `file_hash` is retained as raw Cato context, not assigned an algorithm from its length. FLOWS/appstats are outside this package.
+
+Source epoch-millisecond timestamps are already mapped to native `TimeGenerated` by the Cato connector's DCR. Parsers use a retained original `time` when available, otherwise that mapped source clock, with `time_str` as an alternative when the primary clock is unavailable/invalid. Timestamp normalization and parser time filters use the same selected clock. Missing/null event counts become 1; malformed-present or invalid counts are excluded.
+
+### Upgrading the earlier eight-schema preview
+
+This breaking preview revision removes the speculative Entra API routes. FileEvent is on hold; UserManagement is outside the reviewed baseline. Earlier coverage measurements are not representative of this catalog, and independent schemas may overlap.
+
+Incremental deployment updates the twelve active functions but does **not delete** the four retired saved searches. Back up customizations and review dependent queries/workbooks before removing them. Remove only their Cato source registrations from custom unifier unions, preserving all other providers, then explicitly remove the retired aliases if no longer needed:
+
+- `vimFileEventCato_<table>` and `ASimFileEventCato_<table>`
+- `vimUserManagementCato_<table>` and `ASimUserManagementCato_<table>`
+
+Replace `<table>` with the exact existing table name, including `_CL`. The installer never edits unifiers or deletes these functions; until explicit cleanup, an old function remaining visible does not mean it is supported by catalog 2.0.0.
 
 ## Scope, permissions, and rollback
 
