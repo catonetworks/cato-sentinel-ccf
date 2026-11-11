@@ -15,6 +15,10 @@ so only this template changes them.
 Nothing breaks if you skip it. Events keep arriving, and fields not in your table are simply not
 stored.
 
+## ASIM parser preview
+
+Preview Cato ASIM parsers for Microsoft Sentinel, with deployment guidance and template choices, in the [ASIM parser guide](asim/README.md).
+
 ## Apply the update
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2Fmain%2FupdateTemplate.json)
