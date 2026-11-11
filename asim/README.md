@@ -1,11 +1,11 @@
 # Cato ASIM parsers for Microsoft Sentinel — preview
 
-Deploy the preview parsers as workspace saved searches to normalize Cato events to Microsoft's Advanced Security Information Model (ASIM). The preview includes **6 schemas and 12 functions** (Catalog version 2.0.0; Microsoft schema version 1.0.0). Mapping review is ongoing; this is not a certification or a Content Hub release.
+Deploy the preview parsers as workspace saved searches to normalize Cato events to Microsoft's Advanced Security Information Model (ASIM). The preview includes **6 schemas and 12 functions** (Catalog version 2.0.1; Microsoft schema version 1.0.0). Mapping review is ongoing; this is not a certification or a Content Hub release.
 
 Choose the template for your table:
 
-- **Existing custom table with a supported name:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2F80ec57369bdf34ca63cea116a3960a28ec3ee038%2Fasim%2FarmTemplate.json)
-- **Standard `CatoNetworksEvents_CL` table:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2F80ec57369bdf34ca63cea116a3960a28ec3ee038%2Fasim%2FccfTemplate.json)
+- **Existing custom table with a supported name:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2F7aa153c0ef56f28a39dba54c290a8a2925abb31f%2Fasim%2FarmTemplate.json)
+- **Standard `CatoNetworksEvents_CL` table:** [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcatonetworks%2Fcato-sentinel-ccf%2F7aa153c0ef56f28a39dba54c290a8a2925abb31f%2Fasim%2FccfTemplate.json)
 
 ## Deploy in Azure portal
 
@@ -24,7 +24,7 @@ SUBSCRIPTION_ID='<subscription-id>'
 RESOURCE_GROUP='<resource-group>'
 WORKSPACE_NAME='<workspace-name>'
 TABLE_NAME='<existing-table-name>'
-TEMPLATE_URI='https://raw.githubusercontent.com/catonetworks/cato-sentinel-ccf/80ec57369bdf34ca63cea116a3960a28ec3ee038/asim/armTemplate.json'
+TEMPLATE_URI='https://raw.githubusercontent.com/catonetworks/cato-sentinel-ccf/7aa153c0ef56f28a39dba54c290a8a2925abb31f/asim/armTemplate.json'
 ```
 
 Preview with what-if, then deploy incrementally:
@@ -54,7 +54,7 @@ To include Cato in a shared ASIM unifier, add its source-function invocation to 
 
 Dashboards need events in the chosen table, required fields populated by those events, and a time range containing matching data. Empty results or panels can be valid when those conditions are not met.
 
-## Catalog 2.0.0 mapping scope
+## Catalog 2.0.1 mapping scope
 
 | Schema | Cato EVENTS selected |
 | --- | --- |
@@ -69,6 +69,8 @@ Optional evidence does not further restrict these classifiers. Missing HTTP stat
 
 Source epoch-millisecond timestamps are already mapped to native `TimeGenerated` by the Cato connector's DCR. Parsers use a retained original `time` when available, otherwise that mapped source clock, with `time_str` as an alternative when the primary clock is unavailable/invalid. Timestamp normalization and parser time filters use the same selected clock. Missing/null event counts become 1; malformed-present or invalid counts are excluded.
 
+Version 2.0.1 corrects AuditEvent user-type normalization for native Azure Boolean columns: `is_admin` maps to `Admin`/`Regular` regardless of Boolean text casing. Classification and function aliases are unchanged. Existing customers apply the patch manually using the pinned installer.
+
 ### Upgrading the earlier eight-schema preview
 
 This breaking preview revision removes the speculative Entra API routes. FileEvent is on hold; UserManagement is outside the reviewed baseline. Earlier coverage measurements are not representative of this catalog, and independent schemas may overlap.
@@ -78,7 +80,7 @@ Incremental deployment updates the twelve active functions but does **not delete
 - `vimFileEventCato_<table>` and `ASimFileEventCato_<table>`
 - `vimUserManagementCato_<table>` and `ASimUserManagementCato_<table>`
 
-Replace `<table>` with the exact existing table name, including `_CL`. The installer never edits unifiers or deletes these functions; until explicit cleanup, an old function remaining visible does not mean it is supported by catalog 2.0.0.
+Replace `<table>` with the exact existing table name, including `_CL`. The installer never edits unifiers or deletes these functions; until explicit cleanup, an old function remaining visible does not mean it is supported by catalog 2.0.1.
 
 ## Scope, permissions, and rollback
 
